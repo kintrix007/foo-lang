@@ -25,7 +25,10 @@ source-repository head
 
 library
   exposed-modules:
-      Expression, Parser, Lib
+      Expression
+      ExprParse
+      Lib
+      Parser
   other-modules:
       Paths_foo_lang
   hs-source-dirs:

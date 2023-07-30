@@ -1,10 +1,23 @@
 {-# LANGUAGE InstanceSigs #-}
 {-# LANGUAGE LambdaCase   #-}
-module Parser (Parser (..), parse, item, sat, char, string, nat, int, space, token) where
+module Parser
+( Parser (..)
+, parse
+, item
+, sat
+, char
+, string
+, nat
+, int
+, space
+, token
+, integer
+, ident
+) where
 
 import           Control.Applicative
 import           Control.Monad
-import           Data.Char           (isSpace, isDigit)
+import           Data.Char           (isDigit, isSpace, isAlphaNum)
 
 newtype Parser c a = Parser ([c] -> Maybe (a, [c]))
 
@@ -70,7 +83,7 @@ string (c:cs) = do
   return (c:cs)
 
 nat :: Parser Char String
-nat = many (sat isDigit)
+nat = some (sat isDigit)
 
 int :: Parser Char String
 int =
@@ -80,8 +93,21 @@ int =
     return (s:n)
   <|> nat
 
+integer :: Parser Char Integer
+integer = read <$> int
+
 space :: Parser Char ()
 space = void $ many (sat isSpace)
+
+ident :: Parser Char String
+ident =
+  some (sat (isAlphaNum))
+  <|> -- (char '|' >> some (sat (/='|')) >>= \i -> char '|' >> return i)
+    do
+      _ <- char '|'
+      i <- some $ sat (/= '|')
+      _ <- char '|'
+      return i
 
 token :: Parser Char a -> Parser Char a
 token p = do
@@ -89,3 +115,4 @@ token p = do
   x <- p
   space
   return x
+

@@ -1,4 +1,4 @@
-module Parse (Expression (..)) where
+module Expression (Expression (..)) where
 
 type Ident = String
 
@@ -12,3 +12,4 @@ data Expression
   | ELetRec ![(Ident, Expression)]
   | EFunc ![Ident] !Expression
   | ECall !Ident ![Expression]
+  deriving (Show, Eq)
