@@ -1,0 +1,7 @@
+(let
+ ((foo (= 3 2))
+  (bar (< 3 2))
+  (baz (> 3 2))
+  (and (& foo bar))
+  (or  (| bar baz)))
+ (debug foo bar baz and or))

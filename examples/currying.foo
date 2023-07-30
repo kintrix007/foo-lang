@@ -1,0 +1,8 @@
+(let
+ ((add
+   (fn (a b c d)
+    (+ (+ a b) (+ c d))
+   )))
+ (print ((((add 5) 6) 9) 22))
+ # Same as
+ # (print (add 5 6 9 22))

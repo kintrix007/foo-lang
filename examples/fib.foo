@@ -1,0 +1,9 @@
+(letrec
+ ((fib
+   # n has to be non-negative.
+   (fn n
+    (if (< n 2)
+     (print n)
+     (print (+ (fib (- n 1)) (fib (- n 2))))
+    ))))
+ (fib 10))

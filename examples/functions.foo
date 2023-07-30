@@ -1,0 +1,7 @@
+# Yes, I think this syntax is super intuitive...
+(let
+ ((add
+   (fn (x y)
+    (+ x y)
+   )))
+ (print (add 8 7))

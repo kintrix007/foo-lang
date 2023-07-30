@@ -1,0 +1,6 @@
+(letrec
+ ((foo 5)
+  (bar (* 2 foo))
+  (baz (- bar (/ foo 2)))
+ )
+ (debug foo bar baz)
