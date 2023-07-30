@@ -18,27 +18,33 @@ parseIf = do
 parseVar :: Parser Char Expression
 parseVar = EVar <$> token ident
 
-parseLetBody :: Parser Char [(String, Expression)]
-parseLetBody = do
+parseLetPairs :: Parser Char [(String, Expression)]
+parseLetPairs = do
   _ <- token $ char '('
-  pairs <- many $ do
+
+  pairs <- some $ do
     _ <- char '('
     i    <- token ident
     expr <- token parseExpression
     _ <- char ')'
     return (i, expr)
+
   _ <- token $ char ')'
   return pairs
 
 parseLet :: Parser Char Expression
 parseLet = do
   _ <- token $ string "let"
-  ELet <$> parseLetBody
+  pairs <- parseLetPairs
+  expr <- parseExpression
+  return $ ELet pairs expr
 
 parseLetRec :: Parser Char Expression
 parseLetRec = do
   _ <- token $ string "letrec"
-  ELetRec <$> parseLetBody
+  pairs <- parseLetPairs
+  expr <- parseExpression
+  return $ ELetRec pairs expr
 
 parseFunc :: Parser Char Expression
 parseFunc = do
@@ -65,9 +71,8 @@ parseExpression =
     x <- parsers
     _ <- token (char ')')
     return x
-  -- <|> token parsers
+  <|> token parsers
   where
-    -- parsers = parseCall <|> parseVar
     parsers = parseInt <|> parseIf
       <|> parseLet <|> parseLetRec
       <|> parseFunc <|> parseCall <|> parseVar

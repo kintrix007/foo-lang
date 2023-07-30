@@ -101,7 +101,7 @@ space = void $ many (sat isSpace)
 
 ident :: Parser Char String
 ident =
-  some (sat (isAlphaNum))
+  some (sat (not . isSpace))
   <|> -- (char '|' >> some (sat (/='|')) >>= \i -> char '|' >> return i)
     do
       _ <- char '|'
