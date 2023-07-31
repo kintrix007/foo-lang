@@ -1,0 +1,25 @@
+name: CI
+
+on:
+  push:
+    branches:
+      - master
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+
+      - name: Stack
+        id: stack
+        uses: freckle/stack-action@v4
+        with:
+          stack-arguments: --coverage
+
+      - name: Upload Coverage
+        uses: actions/upload-artifact@v2
+        with:
+          name: coverage-report
+          path: ${{ steps.stack.outputs.local-hpc-root }}/index.html
