@@ -1,2 +1,7 @@
+import qualified ParsingTest as PT
+import           Test.HUnit
+
 main :: IO ()
-main = putStrLn "Test suite not yet implemented"
+main = runTestTTAndExit $ TestList
+  [ PT.tests
+  ]
