@@ -12,7 +12,7 @@ module Parser
 , space
 , token
 , integer
-, ident
+, paren
 ) where
 
 import           Control.Applicative
@@ -99,16 +99,6 @@ integer = read <$> int
 space :: Parser Char ()
 space = void $ many (sat isSpace)
 
-ident :: Parser Char String
-ident =
-  some (sat (not . isSpace))
-  <|> -- (char '|' >> some (sat (/='|')) >>= \i -> char '|' >> return i)
-    do
-      _ <- char '|'
-      i <- some $ sat (/= '|')
-      _ <- char '|'
-      return i
-
 token :: Parser Char a -> Parser Char a
 token p = do
   space
@@ -116,3 +106,9 @@ token p = do
   space
   return x
 
+paren :: Parser Char a -> Parser Char a
+paren p = do
+  _ <- token $ char '('
+  x <- p
+  _ <- token $ char ')'
+  return x

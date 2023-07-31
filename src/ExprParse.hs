@@ -1,8 +1,21 @@
-module ExprParse (parseExpression) where
+module ExprParse (parseExpression, runExprParser, keywords) where
 
 import           Control.Applicative
+import           Data.Char
 import           Expression
 import           Parser
+
+keywords :: [Ident]
+keywords = ["if", "let", "letrec", "fn"]
+
+runExprParser :: String -> Either String Expression
+runExprParser inp =
+  case parse parseExpression inp of
+    Nothing           -> Left "Failed to parse."
+    Just (expr, rest) ->
+      if not $ null rest
+        then Left ("Stopped parsing with leftover: '" ++ show rest ++ "'")
+        else Right expr
 
 parseInt :: Parser Char Expression
 parseInt = EInt <$> token integer
@@ -15,22 +28,33 @@ parseIf = do
   falseCase <- parseExpression
   return $ EIf cond trueCase falseCase
 
+parseIdent :: Parser Char String
+parseIdent =
+  do
+    _ <- char '|'
+    i <- some $ sat (/= '|')
+    _ <- char '|'
+    return i
+  <|>
+  do
+    i <- some $ sat (\c -> not . any ($c) $ disallowed)
+    if i `elem` keywords
+      then empty
+      else return i
+    where
+      disallowed = [isSpace, (`elem` ['(', ')'])]
+
 parseVar :: Parser Char Expression
-parseVar = EVar <$> token ident
+parseVar = EVar <$> token parseIdent
 
 parseLetPairs :: Parser Char [(String, Expression)]
 parseLetPairs = do
-  _ <- token $ char '('
-
-  pairs <- some $ do
-    _ <- char '('
-    i    <- token ident
+  paren . some $ do
+    _ <- token $ char '('
+    i    <- token parseIdent
     expr <- token parseExpression
-    _ <- char ')'
+    _ <- token $ char ')'
     return (i, expr)
-
-  _ <- token $ char ')'
-  return pairs
 
 parseLet :: Parser Char Expression
 parseLet = do
@@ -49,29 +73,23 @@ parseLetRec = do
 parseFunc :: Parser Char Expression
 parseFunc = do
   _ <- token $ string "fn"
-  _ <- char '('
-  params <- some $ token ident
-  _ <- char ')'
+
+  params <- paren $ some $ token parseIdent
   space
-  _ <- char '('
   body <- parseExpression
-  _ <- char ')'
   return $ EFunc params body
 
 parseCall :: Parser Char Expression
 parseCall = do
-  i <- token ident
+  _ <- token $ char '('
+  i <- paren parseIdent <|> token parseIdent
   args <- some $ token parseExpression
+  _ <- token $ char ')'
   return $ ECall i args
 
 parseExpression :: Parser Char Expression
 parseExpression =
-  do
-    _ <- token (char '(')
-    x <- parsers
-    _ <- token (char ')')
-    return x
-  <|> token parsers
+  paren parsers <|> token parsers
   where
     parsers = parseInt <|> parseIf
       <|> parseLet <|> parseLetRec
