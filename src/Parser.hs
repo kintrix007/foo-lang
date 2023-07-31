@@ -17,7 +17,7 @@ module Parser
 
 import           Control.Applicative
 import           Control.Monad
-import           Data.Char           (isDigit, isSpace, isAlphaNum)
+import           Data.Char           (isDigit, isSpace)
 
 newtype Parser c a = Parser ([c] -> Maybe (a, [c]))
 
