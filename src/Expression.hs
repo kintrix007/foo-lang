@@ -1,4 +1,4 @@
-module Expression (Expression (..)) where
+module Expression (Expression (..), Ident) where
 
 type Ident = String
 
@@ -6,10 +6,10 @@ type Ident = String
 -- as a function..? Hopefully yes.
 data Expression
   = EInt !Integer
+  | EVar !Ident -- Maybe merge this with ECall in the future
+  | ECall !Ident ![Expression]
   | EIf !Expression !Expression !Expression
-  | EVar !Ident
   | ELet ![(Ident, Expression)] !Expression
   | ELetRec ![(Ident, Expression)] !Expression
   | EFunc ![Ident] !Expression
-  | ECall !Ident ![Expression]
   deriving (Show, Eq)
