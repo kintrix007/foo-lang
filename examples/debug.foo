@@ -1,2 +1,2 @@
 (let ((a 2) (b 3) (c 42))
- (debug a b c (/ c 3))
+ (debug a b c (/ c 3)) # a = 2, b = 3, c = 42, (/ c 3) = 14
