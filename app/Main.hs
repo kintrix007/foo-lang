@@ -2,8 +2,8 @@ module Main (main) where
 
 import           Data.Map           as M
 import           ExprParse          (runExprParser)
+import           Interpreter        (interpret)
 import           System.Environment (getArgs)
-import Interpreter (interpret, Value (..))
 
 main :: IO ()
 main = do
@@ -16,8 +16,6 @@ main = do
 
   let res = case interpret M.empty ast of
         Nothing -> error "Runtime error"
-        Just x -> x
-  
-  case res of
-    VInt x -> print x
-    VFunc _ x _ -> putStrLn ("(fn (" ++ unwords x ++ ") ?)")
+        Just x  -> x
+
+  print res
