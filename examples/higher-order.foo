@@ -1,6 +1,5 @@
 (let
- ((apply
-   (fn (f x)
-    (f x)
+ ((twice (fn (f x) (f (f x))
    )))
- (print (apply (fn x (+ x 1)) 42))
+ ((twice (fn (x) (+ x 1)) 42)))
+
