@@ -11,6 +11,7 @@ builtins = M.fromList
   , ("*", VNativeFunc multiplication)
   , ("/", VNativeFunc division)
   , ("print", VNativeFunc print')
+  , ("debug", VNativeFunc debug')
   ]
 
 addition :: [Value] -> Maybe Value
@@ -33,3 +34,6 @@ division _                = Nothing
 print' :: [Value] -> Maybe Value
 print' [x] = Just $ trace (show x) x
 print' _   = Nothing
+
+debug' :: [Value] -> Maybe Value
+debug' xs = Just $ trace (unwords $ map show xs) (last xs)
