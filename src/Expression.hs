@@ -6,8 +6,8 @@ type Ident = String
 -- as a function..? Hopefully yes.
 data Expression
   = EInt !Integer
-  | EVar !Ident -- Maybe merge this with ECall in the future
-  | ECall !Ident ![Expression]
+  | EVar !Ident
+  | ECall !Expression ![Expression]
   | EIf !Expression !Expression !Expression
   | ELet ![(Ident, Expression)] !Expression
   | ELetRec ![(Ident, Expression)] !Expression

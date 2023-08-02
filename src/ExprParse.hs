@@ -82,7 +82,7 @@ parseFunc = do
 parseCall :: Parser Char Expression
 parseCall = do
   _ <- token $ char '('
-  i <- paren parseIdent <|> token parseIdent
+  i <- parseExpression
   args <- some $ token parseExpression
   _ <- token $ char ')'
   return $ ECall i args
