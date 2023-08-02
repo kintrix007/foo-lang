@@ -29,6 +29,8 @@ library
       ExprParse
       Interpreter
       Parser
+      StandardLibrary
+      Value
   other-modules:
       Paths_foo_lang
   hs-source-dirs:
