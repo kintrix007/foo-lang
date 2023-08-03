@@ -6,7 +6,7 @@ import           Expression
 data Value
   = VInt !Integer
   | VFunc !Environment ![Ident] !Expression
-  | VNativeFunc !([Value] -> Maybe Value)
+  | VNativeFunc !([Value] -> Either String Value)
 
 instance Show Value where
   show (VInt n)         = show n

@@ -14,26 +14,35 @@ builtins = M.fromList
   , ("debug", VNativeFunc debug')
   ]
 
-addition :: [Value] -> Maybe Value
-addition [VInt x, VInt y] = Just $ VInt (x + y)
-addition _                = Nothing
+addition :: [Value] -> Either String Value
+addition [VInt x, VInt y] = return $ VInt (x + y)
+addition args             = Left $ wrongArgs args "(int int)"
 
-subtraction :: [Value] -> Maybe Value
-subtraction [VInt x]         = Just $ VInt (-x)
-subtraction [VInt x, VInt y] = Just $ VInt (x - y)
-subtraction _                = Nothing
+subtraction :: [Value] -> Either String Value
+subtraction [VInt x]         = return $ VInt (-x)
+subtraction [VInt x, VInt y] = return $ VInt (x - y)
+subtraction args             = Left $ wrongArgs args "(int) or (int int)"
 
-multiplication :: [Value] -> Maybe Value
-multiplication [VInt x, VInt y] = Just $ VInt (x * y)
-multiplication _                = Nothing
+multiplication :: [Value] -> Either String Value
+multiplication [VInt x, VInt y] = return $ VInt (x * y)
+multiplication args             = Left $ wrongArgs args "(int int)"
 
-division :: [Value] -> Maybe Value
-division [VInt x, VInt y] = Just $ VInt (x `div` y)
-division _                = Nothing
+division :: [Value] -> Either String Value
+division [VInt x, VInt y] = return $ VInt (x `div` y)
+division args             = Left $ wrongArgs args "(int int)"
 
-print' :: [Value] -> Maybe Value
-print' [x] = Just $ trace (show x) x
-print' _   = Nothing
+print' :: [Value] -> Either String Value
+print' [x]  = return $ trace (show x) x
+print' args = Left $ wrongArgs args "(int) or (fn)"
 
-debug' :: [Value] -> Maybe Value
-debug' xs = Just $ trace (unwords $ map show xs) (last xs)
+debug' :: [Value] -> Either String Value
+debug' xs = return $ trace (unwords $ map show xs) (last xs)
+
+wrongArgs :: [Value] -> String -> String
+wrongArgs args expected = "Wrong argument types. Expected " ++ expected
+  ++ ", however received (" ++ concatMap typeof args ++ ")."
+
+typeof :: Value -> String
+typeof VInt {}        = "int"
+typeof VFunc {}       = "fn"
+typeof VNativeFunc {} = "fn"
