@@ -2,10 +2,9 @@ module StandardLibrary (builtins) where
 
 import qualified Data.Map    as M
 import           Debug.Trace (trace)
-import           Expression  (Ident)
-import           Value       (Value (..))
+import           Value       (Environment, Value (..))
 
-builtins :: M.Map Ident Value
+builtins :: Environment
 builtins = M.fromList
   [ ("+", VNativeFunc addition)
   , ("-", VNativeFunc subtraction)
