@@ -20,10 +20,12 @@ runExprParser inp =
 parseComment :: Parser Char a -> Parser Char a
 parseComment p =
   do
-    space
-    _ <- char '#'
-    _ <- many $ sat (/= '\n')
-    _ <- char '\n'
+    _ <- some $ do
+      space
+      _ <- char '#'
+      _ <- many $ sat (/= '\n')
+      _ <- char '\n'
+      return ()
     p
   <|> p
 
