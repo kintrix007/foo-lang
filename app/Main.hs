@@ -15,7 +15,7 @@ main = do
         Right x -> x
 
   let res = case interpret M.empty ast of
-        Nothing -> error "Runtime error"
-        Just x  -> x
+        Left x -> error x
+        Right x  -> x
 
   print res

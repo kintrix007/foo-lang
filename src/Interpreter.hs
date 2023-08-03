@@ -1,11 +1,11 @@
 module Interpreter (Value (..), interpret) where
 
-import           Control.Applicative ((<|>))
-import qualified Data.Map            as M
-import           Expression          (Expression (..), Ident)
-import           StandardLibrary     (builtins)
+import           Data.Either     (isRight)
+import           Data.List       (intercalate)
+import qualified Data.Map        as M
+import           Expression      (Expression (..), Ident)
+import           StandardLibrary (builtins)
 import           Value
-import Data.List (intercalate)
 
 interpret :: Environment -> Expression -> Either String Value
 interpret _ (EInt n)               = Right $ VInt n
@@ -19,7 +19,7 @@ interpret env (EFunc params body)  = Right $ VFunc env params body
 callVar :: Environment -> Ident -> Either String Value
 callVar env ident =
   maybeToEither msg (M.lookup ident env)
-  <|> maybeToEither msg (M.lookup ident builtins)
+  <> maybeToEither msg (M.lookup ident builtins)
   where
     msg = "Identifier '" ++ ident ++ "' does not exist."
 
@@ -42,11 +42,14 @@ callLet env pairs body = do
   where
     (idents, exprs) = unzip pairs
 
--- Uhhh, so problem: I do not think it is possible to implement
--- letrec with Environment being modeled like this...
 callLetRec :: Environment -> [(Ident, Expression)] -> Expression -> Either String Value
 callLetRec env pairs body = do
-  error "To be implemented"
+  args <- interpretBatch env exprs
+  let boundEnv = M.fromList $ zip idents args
+  let newEnv = boundEnv `M.union` env
+  interpret newEnv body
+  where
+    (idents, exprs) = unzip pairs
 
 callFunc :: Environment -> Expression -> [Expression] -> Either String Value
 callFunc env funcExpr argExrps = do
@@ -71,9 +74,9 @@ interpretBatch env args = do
     interpreted = map (interpret env) args
     flattened = if all isRight interpreted
       then Right [x | Right x <- interpreted]
-      else Left ("Errors encountered: \n" ++
-        intercalate "\n" (numberLines [x | Left x <- interpreted]))
-    numberLines ls = zipWith (\n l -> show n ++ ". " ++ l) [1..] ls
+      else Left ("Errors encountered:\n" ++ intercalate "\n" lineList)
+    numberLines ls = zipWith (\n l -> show n ++ ". " ++ l) [1 :: Int ..] ls
+    lineList = map ("  " ++ ) $ numberLines [x | Left x <- interpreted]
 
 isSameLength :: [a] -> [b] -> Bool
 isSameLength [] []         = True
