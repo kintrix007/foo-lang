@@ -2,10 +2,10 @@ module Interpreter (Value (..), interpret) where
 
 import           Control.Applicative ((<|>))
 import qualified Data.Map            as M
-import           Data.Maybe
+import           Data.Maybe          (fromJust, isJust)
 import           Expression          (Expression (..), Ident)
 import           StandardLibrary     (builtins)
-import           Value
+import           Value               (Environment, Value (..))
 
 interpret :: Environment -> Expression -> Maybe Value
 interpret _ (EInt n)               = Just $ VInt n
@@ -17,8 +17,8 @@ interpret env (ELetRec pairs expr) = callLetRec env pairs expr
 interpret env (EFunc ss ex')       = Just $ VFunc env ss ex'
 
 callVar :: Environment -> Ident -> Maybe Value
-callVar env ident =
-  M.lookup ident env
+callVar env ident = do
+  interpret env =<< M.lookup ident env
   <|> M.lookup ident builtins
 
 callIf :: Environment -> Expression -> Expression -> Expression -> Maybe Value
@@ -33,8 +33,7 @@ callIf env cond tb fb = do
 
 callLet :: Environment -> [(Ident, Expression)] -> Expression -> Maybe Value
 callLet env pairs expr = do
-  args' <- interpretBatch env exprs
-  let boundEnv = M.fromList $ zip idents args'
+  let boundEnv = M.fromList $ zip idents exprs
   let newEnv = boundEnv `M.union` env
   interpret newEnv expr
   where
@@ -48,15 +47,15 @@ callLetRec env pairs expr = do
 
 callFunc :: Environment -> Expression -> [Expression] -> Maybe Value
 callFunc env funcExpr argExrps = do
-  args <- interpretBatch env argExrps
   func <- interpret env funcExpr
+  args <- interpretBatch env argExrps
 
   case func of
     VInt _ -> Nothing
     VNativeFunc f -> f args
     VFunc closureEnv params body ->
       if isSameLength params argExrps
-        then let boundEnv = M.fromList (zip params args)
+        then let boundEnv = M.fromList (zip params argExrps)
               in interpret (boundEnv `M.union` closureEnv) body
         else Nothing
 
