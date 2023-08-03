@@ -17,6 +17,17 @@ runExprParser inp =
         then Left ("Stopped parsing with leftover: '" ++ show rest ++ "'")
         else Right expr
 
+parseComment :: Parser Char a -> Parser Char a
+parseComment p =
+  do
+    space
+    _ <- char '#'
+    _ <- many $ sat (/= '\n')
+    _ <- char '\n'
+    p
+  <|> p
+
+
 parseInt :: Parser Char Expression
 parseInt = EInt <$> token integer
 
@@ -91,6 +102,6 @@ parseExpression :: Parser Char Expression
 parseExpression =
   paren parsers <|> token parsers
   where
-    parsers = parseInt <|> parseIf
+    parsers = parseComment (parseInt <|> parseIf
       <|> parseLet <|> parseLetRec
-      <|> parseFunc <|> parseCall <|> parseVar
+      <|> parseFunc <|> parseCall <|> parseVar)
