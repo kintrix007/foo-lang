@@ -10,6 +10,9 @@ builtins = M.fromList
   , ("-", VNativeFunc subtraction)
   , ("*", VNativeFunc multiplication)
   , ("/", VNativeFunc division)
+  , ("<", VNativeFunc lessThan)
+  , (">", VNativeFunc greaterThan)
+  , ("=", VNativeFunc equals)
   , ("print", VNativeFunc print')
   , ("debug", VNativeFunc debug')
   ]
@@ -30,6 +33,18 @@ multiplication args             = Left $ wrongArgs args "(int int)"
 division :: [Value] -> Either String Value
 division [VInt x, VInt y] = return $ VInt (x `div` y)
 division args             = Left $ wrongArgs args "(int int)"
+
+lessThan :: [Value] -> Either String Value
+lessThan [VInt x, VInt y] = return $ VInt (if x < y then 1 else 0)
+lessThan args             = Left $ wrongArgs args "(int int)"
+
+greaterThan :: [Value] -> Either String Value
+greaterThan [VInt x, VInt y] = return $ VInt (if x > y then 1 else 0)
+greaterThan args             = Left $ wrongArgs args "(int int)"
+
+equals :: [Value] -> Either String Value
+equals [VInt x, VInt y] = return $ VInt (if x == y then 1 else 0)
+equals args             = Left $ wrongArgs args "(int int)"
 
 print' :: [Value] -> Either String Value
 print' [x]  = return $ trace (show x) x
