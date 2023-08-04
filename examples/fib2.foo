@@ -1,11 +1,8 @@
 (letrec
- ((fib
-   (fn n
-    (fibn n 0 1)))
-  (fibn
+ ((fibn
    (fn (n a b)
     (if (< n 1)
-     (print a)
-     (print (+ a (fibn (- n 1) b (+ a b))))
+     (a)
+     (fibn (- n 1) b (+ (print a) b))
     ))))
- (fib 10))
+ (fibn 10 0 1))
