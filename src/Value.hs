@@ -13,5 +13,12 @@ instance Show Value where
   show (VFunc _ args _) = "(fn (" ++ unwords args ++ ") ?)"
   show (VNativeFunc _)  = "|built-in function|"
 
+instance Eq Value where
+  (VInt n) == (VInt m) = n == m
+  (VFunc env params body) == (VFunc env' params' body') =
+    env == env' && params == params' && body == body'
+  (VNativeFunc _) == (VNativeFunc _) = error "Cannot compare built-in function types"
+  _ == _ = False
+
 type Environment = M.Map Ident Value
 
