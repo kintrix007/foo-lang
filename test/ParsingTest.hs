@@ -7,7 +7,13 @@ import           Test.HUnit
 
 tests :: Test
 tests = TestList
-  [ tc "int1" $ assertBool "holds" ("42" `parseTo` EInt 42)
+  [ tc "comment1" $ assertBool "holds" ("5 # Comment" `parseTo` EInt 5)
+  , tc "comment2" $ assertBool "holds" ("5#Comment" `parseTo` EInt 5)
+  , tc "comment3" $ assertBool "fails" (fails "# (+ 5 2)")
+  , tc "comment4" $ assertBool "holds" ("(+ 5 # five\n 3)"
+    `parseTo` ECall (EVar "+") [EInt 5, EInt 3])
+  , tc "comment5" $ assertBool "fails" (fails "(+ 5 # five 3)")
+  , tc "int1" $ assertBool "holds" ("42" `parseTo` EInt 42)
   , tc "int2" $ assertBool "holds" ("(6)" `parseTo` EInt 6)
   , tc "int3" $ assertBool "holds" ("(-2)" `parseTo` EInt (-2))
   , tc "int4" $ assertBool "holds" ("-1024" `parseTo` EInt (-1024))
