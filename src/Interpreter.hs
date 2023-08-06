@@ -75,8 +75,8 @@ callFunc env funcExpr argExrps = do
       if isSameLength params argExrps
         then let boundEnv = M.fromList (zip params args)
               in interpret (boundEnv `M.union` closureEnv `M.union` env) body
-        else Left ("Attempted to call '" ++ show func ++ "' with "
-          ++ unwords params ++ ", but argument count does not match.")
+        else Left ("Attempted to call '" ++ show func ++ "' with ("
+          ++ unwords params ++ "), but argument count does not match.")
 
 interpretBatch :: Environment -> [Expression] -> Either String [Value]
 interpretBatch env args = do
