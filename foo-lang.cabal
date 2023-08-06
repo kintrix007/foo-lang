@@ -60,6 +60,7 @@ test-suite foo-lang-test
   type: exitcode-stdio-1.0
   main-is: Spec.hs
   other-modules:
+      InterpreterTest
       ParsingTest
       Paths_foo_lang
   hs-source-dirs:
