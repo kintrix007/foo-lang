@@ -13,6 +13,9 @@ builtins = M.fromList
   , ("<", VNativeFunc lessThan)
   , (">", VNativeFunc greaterThan)
   , ("=", VNativeFunc equals)
+  , ("&", VNativeFunc booleanAnd)
+  , ("|", VNativeFunc booleanOr)
+  , ("~", VNativeFunc booleanNot)
   , ("print", VNativeFunc print')
   , ("debug", VNativeFunc debug')
   ]
@@ -45,6 +48,18 @@ greaterThan args             = Left $ wrongArgs args "(int int)"
 equals :: [Value] -> Either String Value
 equals [VInt x, VInt y] = return $ VInt (if x == y then 1 else 0)
 equals args             = Left $ wrongArgs args "(int int)"
+
+booleanAnd :: [Value] -> Either String Value
+booleanAnd [VInt x, VInt y] = return $ VInt (if x /= 0 && y /= 0 then 1 else 0)
+booleanAnd args             = Left $ wrongArgs args "(int int)"
+
+booleanOr :: [Value] -> Either String Value
+booleanOr [VInt x, VInt y] = return $ VInt (if x /= 0 || y /= 0 then 1 else 0)
+booleanOr args             = Left $ wrongArgs args "(int int)"
+
+booleanNot :: [Value] -> Either String Value
+booleanNot [VInt x] = return $ VInt (if x /= 0 then 0 else 1)
+booleanNot args             = Left $ wrongArgs args "(int int)"
 
 print' :: [Value] -> Either String Value
 print' [x]  = return $ trace (show x) x
