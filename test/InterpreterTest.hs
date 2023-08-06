@@ -36,7 +36,7 @@ tests = TestList
   , tc "letrec4" $ assertBool "holds" ("(letrec ((foo 7) (bar 5)) (bar))"
     `evalTo` VInt 5)
   , tc "letrecFails1" $ assertBool "fails" (fails "(letrec ((foo foo)) (foo))")
-  , tc "letrec5" $ assertBool "fails" ("(letrec ((foo foo)) (-1))"
+  , tc "letrec5" $ assertBool "holds" ("(letrec ((foo foo)) (-1))"
     `evalTo` VInt (-1))
   , tc "letrecFn1" $ assertBool "holds" ("(letrec ((foo (fn (x) (x)))) (foo 6))"
     `evalTo` VInt 6)
@@ -45,9 +45,12 @@ tests = TestList
   , tc "letrecFn2" $ assertBool "holds"
       ("(letrec ((pow (fn (x) (if (x) (* 2 (pow (- x 1))) (1))))) (pow 4))"
       `evalTo` VInt 16)
+  , tc "letrecFn2" $ assertBool "holds"
+      ("(letrec ((fac (fn (x) (if x (* x (fac (- x 1))) (1)))) (fac 5))"
+      `evalTo` VInt 120)
   , tc "if1" $ assertBool "holds" ("(if 1 42 69)" `evalTo` VInt 42)
   , tc "if2" $ assertBool "holds" ("(if 0 42 69)" `evalTo` VInt 69)
-  , tc "if3" $ assertBool "holds" ("(if -1 42 69)" `evalTo` VInt 42)
+  , tc "if2" $ assertBool "holds" ("(if -1 42 69)" `evalTo` VInt 42)
   , tc "func1" $ assertBool "holds" ("(fn (x) (x))"
     `evalTo` VFunc M.empty ["x"] (EVar "x"))
   , tc "func2" $ assertBool "holds" ("(fn (x y z) (5))"
@@ -58,6 +61,10 @@ tests = TestList
   , tc "funcFails2" $ assertBool "fails" (fails "(fn (x) (fn (y) (foo)))")
   , tc "funcFails3" $ assertBool "fails" (fails "((fn (x) (if x 10 y)) (1))")
   , tc "funcFails4" $ assertBool "fails" (fails "((fn (x) (if x 10 y)) (0))")
+  , tc "scope1" $ assertBool "holds" ("(let ((x 5)) (let ((x (+ x 1))) (x)))"
+    `evalTo` VInt 12)
+  , tc "scopeFails1" $ assertBool "fails"
+    (fails "(let ((x 5)) (letrec ((x (+ x 1))) (x)))")
   ]
 
 tc :: String -> Assertion -> Test
