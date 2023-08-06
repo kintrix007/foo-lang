@@ -1,7 +1,8 @@
-module Interpreter (Value (..), interpret) where
+module Interpreter (Value (..), interpret, identList) where
 
 import           Data.Either     (isRight)
 import           Data.List       (intercalate)
+import           Data.Map        (notMember)
 import qualified Data.Map        as M
 import           Expression      (Expression (..), Ident)
 import           StandardLibrary (builtins)
@@ -38,7 +39,12 @@ callLet env pairs body = do
   args <- interpretBatch env exprs
   let boundEnv = M.fromList $ zip idents args
   let newEnv = boundEnv `M.union` env
-  interpret newEnv body
+  let bodyIdents = concat [filter (`notElem` params) $ identList fBody | VFunc _ params fBody <- args]
+  let nonExistent = filter (`notMember` (env `M.union` builtins)) bodyIdents -- There is a difference here
+  if not $ null nonExistent
+    then Left ("Attempted to reference non-existent variable(s): "
+      ++ intercalate ", " (map (\x -> "'" ++ x ++ "'") nonExistent))
+    else interpret newEnv body
   where
     (idents, exprs) = unzip pairs
 
@@ -47,7 +53,12 @@ callLetRec env pairs body = do
   args <- interpretBatch env exprs
   let boundEnv = M.fromList $ zip idents args
   let newEnv = boundEnv `M.union` env
-  interpret newEnv body
+  let bodyIdents = concat [filter (`notElem` params) $ identList fBody | VFunc _ params fBody <- args]
+  let nonExistent = filter (`notMember` (newEnv `M.union` builtins)) bodyIdents -- There is a difference here
+  if not $ null nonExistent
+    then Left ("Attempted to reference non-existent variable(s): "
+      ++ intercalate ", " (map (\x -> "'" ++ x ++ "'") nonExistent))
+    else interpret newEnv body
   where
     (idents, exprs) = unzip pairs
 
@@ -77,6 +88,19 @@ interpretBatch env args = do
       else Left ("Errors encountered:\n" ++ intercalate "\n" lineList)
     numberLines ls = zipWith (\n l -> show n ++ ". " ++ l) [1 :: Int ..] ls
     lineList = map ("  " ++ ) $ numberLines [x | Left x <- interpreted]
+
+identList :: Expression -> [Ident]
+identList (EInt _) = []
+identList (EVar ident) = [ident]
+identList (ECall func args) = identList func ++ concatMap identList args
+identList (EIf cond tb fb) = concatMap identList [cond, tb, fb]
+identList (ELet pairs body) =
+  concatMap identList exprs ++ filter (`notElem` idents) (identList body)
+  where (idents, exprs) = unzip pairs
+identList (ELetRec pairs body) =
+  filter (`notElem` idents) (concatMap identList (body:exprs))
+  where (idents, exprs) = unzip pairs
+identList (EFunc params body) = filter (`notElem` params) $ identList body
 
 isSameLength :: [a] -> [b] -> Bool
 isSameLength [] []         = True
