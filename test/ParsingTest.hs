@@ -65,7 +65,7 @@ tests = TestList
   , tc "funcFails2" $ assertBool "holds" (fails "(fn (x y)")
   , tc "funcFails3" $ assertBool "holds" (fails "(fn (10))")
   , tc "whitespace1" $ assertBool "holds"
-    ("let((x y)(a b))(x(a))"
+    ("let((x(y))(a(b)))((x)(a))"
     `parseTo` ELet [("x", EVar "y"), ("a", EVar "b")] (ECall (EVar "x") [EVar "a"]))
   , tc "whitespace2" $ assertBool "holds"
     (" ( let  (  ( x  y   ) (  a b ) )   ( ( x )a ) ) "
